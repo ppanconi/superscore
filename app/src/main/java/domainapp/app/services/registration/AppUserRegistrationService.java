@@ -17,7 +17,7 @@ public class AppUserRegistrationService
 
 	@Override
 	protected Set<ApplicationRole> getAdditionalInitialRoles() {
-		return Collections.emptySet();
+		return Collections.singleton(findRole("superscore-regular-user"));
 	}
 
 	@Override
