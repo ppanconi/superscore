@@ -10,6 +10,8 @@ import javax.jdo.annotations.VersionStrategy;
 
 import org.apache.isis.applib.annotation.DomainObject;
 import org.apache.isis.applib.annotation.MemberOrder;
+import org.apache.isis.applib.services.i18n.TranslatableString;
+import org.apache.isis.applib.util.TitleBuffer;
 import org.isisaddons.module.security.dom.user.ApplicationUser;
 
 @javax.jdo.annotations.PersistenceCapable(
@@ -27,6 +29,12 @@ import org.isisaddons.module.security.dom.user.ApplicationUser;
 @DomainObject
 public class Team {
 
+	public String title() {
+		final TitleBuffer buf = new TitleBuffer();
+		buf.append(getPlayer1().getUsername() + " - " + getPlayer2().getUsername());
+		return buf.toString();
+	}
+	
 	// {{ player1 (property)
 	private ApplicationUser player1;
 
@@ -82,4 +90,8 @@ public class Team {
 		this.lose = lose;
 	}
 	// }}
+	
+	public static void main(String[] args) {
+		System.out.println("kkk");
+	}
 }

@@ -16,6 +16,7 @@ import org.apache.isis.applib.annotation.SemanticsOf;
 import org.apache.isis.applib.services.eventbus.ActionDomainEvent;
 import org.apache.isis.applib.services.i18n.TranslatableString;
 import org.apache.isis.applib.util.TitleBuffer;
+import org.isisaddons.module.security.dom.user.ApplicationUser;
 
 import domainapp.dom.simple.SimpleObject;
 import domainapp.dom.simple.SimpleObjects;
@@ -23,16 +24,16 @@ import domainapp.dom.simple.SimpleObjects.CreateDomainEvent;
 
 @DomainService(
         nature = NatureOfService.VIEW,
-        repositoryFor = Match.class
+        repositoryFor = Team.class
 )
 @DomainServiceLayout(
-        menuOrder = "9"
+        menuOrder = "8"
 )
-public class Matchs {
+public class Teams {
 	
 	//region > title
     public TranslatableString title() {
-        return TranslatableString.tr("Matchs");
+        return TranslatableString.tr("Teams");
     }
     //endregion
 
@@ -44,14 +45,14 @@ public class Matchs {
             bookmarking = BookmarkPolicy.AS_ROOT
     )
     @MemberOrder(sequence = "1")
-    public List<Match> listAll() {
-        return container.allInstances(Match.class);
+    public List<Team> listAll() {
+        return container.allInstances(Team.class);
     }
     //endregion
 
     //region > create (action)
-    public static class CreateDomainEvent extends ActionDomainEvent<Matchs> {
-        public CreateDomainEvent(final Matchs source, final Identifier identifier, final Object... arguments) {
+    public static class CreateDomainEvent extends ActionDomainEvent<Teams> {
+        public CreateDomainEvent(final Teams source, final Identifier identifier, final Object... arguments) {
             super(source, identifier, arguments);
         }
     }
@@ -60,17 +61,13 @@ public class Matchs {
             domainEvent = CreateDomainEvent.class
     )
     @MemberOrder(sequence = "3")
-    public Match create(
-            final @ParameterLayout(named="Winners") Team winners,
-            final @ParameterLayout(named="Losers") Team losers,
-            final @ParameterLayout(named="Winners Score") Integer winnersScore,
-            final @ParameterLayout(named="Losers Score") Integer losersScore
+    public Team create(
+            final @ParameterLayout(named="Player 1") ApplicationUser player1,
+            final @ParameterLayout(named="Player 2") ApplicationUser player2
             ) {
-        final Match obj = container.newTransientInstance(Match.class);
-        obj.setWinners(winners);
-        obj.setLosers(losers);
-        obj.setWinnersScore(winnersScore);
-        obj.setLosersScore(losersScore);
+        final Team obj = container.newTransientInstance(Team.class);
+        obj.setPlayer1(player1);
+        obj.setPlayer2(player2);
         container.persistIfNotAlready(obj);
         return obj;
     }
