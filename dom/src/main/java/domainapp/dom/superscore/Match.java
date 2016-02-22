@@ -1,14 +1,28 @@
 package domainapp.dom.superscore;
 
 import java.util.Date;
+import java.util.List;
 
+import javax.jdo.JDOHelper;
 import javax.jdo.annotations.Column;
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.VersionStrategy;
 
+import org.apache.isis.applib.DomainObjectContainer;
+import org.apache.isis.applib.IsisApplibModule.ActionDomainEvent;
+import org.apache.isis.applib.annotation.Action;
 import org.apache.isis.applib.annotation.DomainObject;
 import org.apache.isis.applib.annotation.MemberOrder;
+import org.apache.isis.applib.annotation.Optionality;
+import org.apache.isis.applib.annotation.Parameter;
+import org.apache.isis.applib.annotation.ParameterLayout;
+import org.apache.isis.applib.annotation.Property;
+import org.apache.isis.applib.annotation.SemanticsOf;
+import org.apache.isis.applib.annotation.Where;
+import org.apache.isis.applib.util.ObjectContracts;
+import org.apache.isis.applib.util.TitleBuffer;
+
 
 @javax.jdo.annotations.PersistenceCapable(
         identityType=IdentityType.DATASTORE,
@@ -23,7 +37,14 @@ import org.apache.isis.applib.annotation.MemberOrder;
         strategy= VersionStrategy.DATE_TIME,
         column="version")
 @DomainObject
-public class Match {
+public class Match implements Comparable<Match> {
+	
+	public String title() {
+		final TitleBuffer buf = new TitleBuffer();
+		buf.append("Match");
+//		buf.append(getWinners().title() + " vs " + getLosers().title() + ":" + getWinnersScore() + "-" + getLosersScore());
+		return buf.toString();
+	}
 	
 	// {{ when (property)
 	private Date when;
@@ -42,7 +63,7 @@ public class Match {
 	// {{ winners (property)
 	private Team winners;
 
-	@MemberOrder(sequence = "1")
+	@MemberOrder(sequence = "2")
 	@Column(allowsNull = "false")
 	@Persistent(mappedBy = "win")
 	public Team getWinners() {
@@ -57,7 +78,7 @@ public class Match {
 	// {{ losers (property)
 	private Team losers;
 
-	@MemberOrder(sequence = "2")
+	@MemberOrder(sequence = "3")
 	@Column(allowsNull = "false")
 	@Persistent(mappedBy = "lose")
 	public Team getLosers() {
@@ -72,7 +93,7 @@ public class Match {
 	// {{ WinnersScore (property)
 	private Integer winnersScore;
 
-	@MemberOrder(sequence = "1")
+	@MemberOrder(sequence = "4")
 	@Column(allowsNull = "false")
 	public Integer getWinnersScore() {
 		return winnersScore;
@@ -86,7 +107,7 @@ public class Match {
 	// {{ LosersScore (property)
 	private Integer losersScore;
 
-	@MemberOrder(sequence = "1")
+	@MemberOrder(sequence = "5")
 	@Column(allowsNull = "false")
 	public Integer getLosersScore() {
 		return losersScore;
@@ -97,4 +118,101 @@ public class Match {
 	}
 	// }}
 	
+	// {{ UnderTable (property)
+	private Boolean underTable;
+
+	@MemberOrder(sequence = "6")
+	@Column(allowsNull = "false")
+	public Boolean getUnderTable() {
+		return underTable;
+	}
+
+	public void setUnderTable(final Boolean underTable) {
+		this.underTable = underTable;
+	}
+	// }}
+
+	// {{ WithAlex (property)
+	private Boolean withAlex;
+
+	@MemberOrder(sequence = "7")
+	@Column(allowsNull = "false")
+	public Boolean getWithAlex() {
+		return withAlex;
+	}
+
+	public void setWithAlex(final Boolean withAlex) {
+		this.withAlex = withAlex;
+	}
+	// }}
+	
+	// {{ delete (action)
+	public static class DeleteDomainEvent extends ActionDomainEvent<Team> {}
+
+    @Action(
+            domainEvent = DeleteDomainEvent.class,
+            semantics = SemanticsOf.NON_IDEMPOTENT
+    )	
+	@MemberOrder(sequence = "5")
+	public List<Match> delete(@Parameter(optionality = Optionality.OPTIONAL)
+    						 @ParameterLayout(named="Are you sure?")
+    						 final Boolean areYouSure) {
+    	container.removeIfNotAlready(this);
+        container.flush();
+        
+        return matchesRepository.listAll();
+	}
+    
+    public String validateDelete(final Boolean areYouSure) {
+        return not(areYouSure) ? "Please confirm this action": null;
+    }
+    public Boolean default0Delete() {
+        return Boolean.FALSE;
+    }
+    
+    static boolean not(final Boolean areYouSure) {
+        return areYouSure == null || !areYouSure;
+    }
+	// }}
+
+    public String validate() {
+    	if (! getWinners().isMatchable(getLosers())) return "Impossible match, check the players";
+    	if (getWinnersScore() < 6) return "Invalid Winners score (>=6)";
+    	if (getWinnersScore() < getLosersScore()) return "Invalid scores. (Winners score > Losers Score)";
+    	if (getWinnersScore() == 6 && getWinnersScore() - getLosersScore() < 2) return "Invalid scores";
+    	if (getWinnersScore() > 6 && getWinnersScore() - getLosersScore() > 2)
+    		return "Invalid scores";
+    	
+    	if (getLosersScore() == 0) {
+        	setUnderTable(true);
+        }
+    	return null;
+	}
+    
+    public void updating() {
+        if (getLosersScore() == 0) {
+        	setUnderTable(true);
+        }
+    }
+    
+	/**
+     * version (derived property)
+     */
+	@Property(hidden=Where.EVERYWHERE)
+    public java.sql.Timestamp getVersionSequence() {
+        return (java.sql.Timestamp) JDOHelper.getVersion(this);
+    }
+
+    @Override
+    public int compareTo(final Match other) {
+        return ObjectContracts.compare(this, other, "winners", "losers", "when");
+    }
+	
+    // {{ SectionName
+    @javax.inject.Inject
+    DomainObjectContainer container;
+
+    @javax.inject.Inject
+    Matches matchesRepository;
+	// }}
 }
