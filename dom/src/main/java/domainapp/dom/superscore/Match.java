@@ -36,6 +36,16 @@ import org.apache.isis.applib.util.TitleBuffer;
 //        strategy=VersionStrategy.VERSION_NUMBER,
         strategy= VersionStrategy.DATE_TIME,
         column="version")
+@javax.jdo.annotations.Queries( {
+    @javax.jdo.annotations.Query(
+            name = "selectLosersPlayers", language = "JDOQL",
+            value = "SELECT losers.player1.username as username, coun(*) as c "
+                    + "FROM domainapp.dom.superscore.Match "
+                    + "WHERE when >= :startDate && when <= :stopDate "
+                    + "GROUP BY username "
+                    + "ORDER BY c"
+                    ),  
+})
 @DomainObject
 public class Match implements Comparable<Match> {
 	
