@@ -83,6 +83,9 @@ public class DomainApplication extends IsisWicketApplication {
                         Providers.of(getServletContext().getResourceAsStream("/META-INF/MANIFEST.MF")));
                 // if uncommented, then overrides isis.appManifest in config file.
                 // bind(AppManifest.class).toInstance(new DomainAppAppManifest());
+                bind(String.class).annotatedWith(Names.named("brandLogoHeader")).toInstance("../images/brand-logo-header.png");
+//                bind(String.class).annotatedWith(Names.named("brandLogoSignin")).toInstance("../images/brand-logo-signin.png");
+                
             }
         };
 

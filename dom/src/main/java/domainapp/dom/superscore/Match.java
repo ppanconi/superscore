@@ -38,12 +38,11 @@ import org.apache.isis.applib.util.TitleBuffer;
         column="version")
 @javax.jdo.annotations.Queries( {
     @javax.jdo.annotations.Query(
-            name = "selectLosersPlayers", language = "JDOQL",
-            value = "SELECT losers.player1.username as username, coun(*) as c "
+            name = "selectLast200", language = "JDOQL",
+            value = "SELECT "
                     + "FROM domainapp.dom.superscore.Match "
-                    + "WHERE when >= :startDate && when <= :stopDate "
-                    + "GROUP BY username "
-                    + "ORDER BY c"
+                    + "ORDER BY when DESC "
+                    + "RANGE 0, 200"
                     ),  
 })
 @DomainObject
@@ -170,7 +169,7 @@ public class Match implements Comparable<Match> {
     	container.removeIfNotAlready(this);
         container.flush();
         
-        return matchesRepository.listAll();
+        return matchesRepository.listLastest();
 	}
     
     public String validateDelete(final Boolean areYouSure) {

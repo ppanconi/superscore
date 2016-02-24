@@ -20,11 +20,6 @@ public class SuperscoreRegularUserRoleAndPermissions extends AbstractRoleAndPerm
                 "domainapp.dom.superscore"
     	);
     	
-    	newPackagePermissions(
-    			ApplicationPermissionRule.ALLOW,
-                ApplicationPermissionMode.CHANGING,
-                "domainapp.dom.simple"
-    	);
 	}
 
 }

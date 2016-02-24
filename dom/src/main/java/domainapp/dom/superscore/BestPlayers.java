@@ -10,15 +10,19 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 
 import org.apache.isis.applib.DomainObjectContainer;
+import org.apache.isis.applib.annotation.Collection;
 import org.apache.isis.applib.annotation.CollectionLayout;
 import org.apache.isis.applib.annotation.DomainObject;
+import org.apache.isis.applib.annotation.Editing;
 import org.apache.isis.applib.annotation.MemberOrder;
 import org.apache.isis.applib.annotation.Nature;
 import org.apache.isis.applib.annotation.ParameterLayout;
 import org.apache.isis.applib.annotation.Property;
 import org.apache.isis.applib.annotation.PropertyLayout;
 import org.apache.isis.applib.annotation.RenderType;
+import org.apache.isis.applib.query.QueryDefault;
 import org.apache.isis.applib.services.jdosupport.IsisJdoSupport;
+import org.apache.isis.applib.util.TitleBuffer;
 import org.joda.time.LocalDate;
 
 /**
@@ -26,10 +30,10 @@ import org.joda.time.LocalDate;
  *
  */
 @DomainObject(nature=Nature.VIEW_MODEL)
-public class WorstPlayers {
+public class BestPlayers {
 	
 	public String title() {
-		return "Worst Players in the period";
+		return "Best Players in the period";
 	}
 
 	// {{ StartDate (property)
@@ -63,10 +67,10 @@ public class WorstPlayers {
 	
 	// {{ updaate (action)
 	@MemberOrder(sequence = "3")
-	public WorstPlayers updatePerdiod(final @ParameterLayout(named="Start Date") LocalDate startDate,
+	public BestPlayers updatePerdiod(final @ParameterLayout(named="Start Date") LocalDate startDate,
 						final @ParameterLayout(named="Stop Date", renderedAsDayBefore=true) LocalDate stopDate) {
 		
-		WorstPlayers model = container.injectServicesInto(new WorstPlayers());
+		BestPlayers model = container.injectServicesInto(new BestPlayers());
 		model.setStartDate(startDate);
 		 
 		if (! stopDate.isAfter(startDate)) {
@@ -92,25 +96,25 @@ public class WorstPlayers {
 
 	@MemberOrder(sequence = "4")
 	@CollectionLayout(sortedBy=PlayerScoreResult.Comparator.class, render=RenderType.EAGERLY)
-	public List<PlayerScoreResult> getWorstPlayers() {
+	public List<PlayerScoreResult> getBestPlayers() {
 		PersistenceManager pm = jdoSupport.getJdoPersistenceManager();
 		
-		String query1 = "SELECT losers.player1 as player, count(losers.player1) as result INTO domainapp.dom.superscore.PlayerScoreResult "
+		String query1 = "SELECT winners.player1 as player, count(winners.player1) as result INTO domainapp.dom.superscore.PlayerScoreResult "
         + "FROM domainapp.dom.superscore.Match "
         + "WHERE when >= :startDate && when <= :stopDate "
-        + "GROUP BY losers.player1 "
-        + "ORDER BY count(losers.player1) DESC "
+        + "GROUP BY winners.player1 "
+        + "ORDER BY count(winners.player1) DESC "
         ;
 		
 		@SuppressWarnings("unchecked")
 		List<PlayerScoreResult> set1 = (List<PlayerScoreResult>) pm.newQuery(query1)
 			.executeWithArray(getStartDate().toDate(), getStopDate().toDate());
 		
-		String query2 = "SELECT losers.player2 as player, count(losers.player2) as result INTO domainapp.dom.superscore.PlayerScoreResult "
+		String query2 = "SELECT winners.player2 as player, count(winners.player2) as result INTO domainapp.dom.superscore.PlayerScoreResult "
 		        + "FROM domainapp.dom.superscore.Match "
 		        + "WHERE when >= :startDate && when <= :stopDate "
-		        + "GROUP BY losers.player2 "
-		        + "ORDER BY count(losers.player2) DESC "
+		        + "GROUP BY winners.player2 "
+		        + "ORDER BY count(winners.player2) DESC "
 		        ;
 		
 		@SuppressWarnings("unchecked")
@@ -129,36 +133,36 @@ public class WorstPlayers {
 		
 		Query jdoQuery = pm.newQuery(query);
 		jdoQuery.setCandidates(l);
-		@SuppressWarnings("unchecked")
-		List<PlayerScoreResult> data = (List<PlayerScoreResult>) jdoQuery.execute();
+		Object data = jdoQuery.execute();
 		
-		return data;
+		return (List<PlayerScoreResult>) data;
 	}
 	
 	
 	@MemberOrder(sequence = "5")
-	@CollectionLayout(sortedBy=PlayerScoreResult.Comparator.class, render=RenderType.EAGERLY)
-	public List<PlayerScoreResult> getUndersPlayers() {
+	@CollectionLayout(sortedBy=PlayerScoreResult.Comparator.class, render=RenderType.EAGERLY,
+					  describedAs="Players who have passed several opponents under the table")
+	public List<PlayerScoreResult> getStrikersPlayers() {
 		PersistenceManager pm = jdoSupport.getJdoPersistenceManager();
 		
-		String query1 = "SELECT losers.player1 as player, count(losers.player1) as result INTO domainapp.dom.superscore.PlayerScoreResult "
+		String query1 = "SELECT winners.player1 as player, count(winners.player1) as result INTO domainapp.dom.superscore.PlayerScoreResult "
         + "FROM domainapp.dom.superscore.Match "
         + "WHERE when >= :startDate && when <= :stopDate "
         + " && underTable == true "
-        + "GROUP BY losers.player1 "
-        + "ORDER BY count(losers.player1) DESC "
+        + "GROUP BY winners.player1 "
+        + "ORDER BY count(winners.player1) DESC "
         ;
 		
 		@SuppressWarnings("unchecked")
 		List<PlayerScoreResult> set1 = (List<PlayerScoreResult>) pm.newQuery(query1)
 			.executeWithArray(getStartDate().toDate(), getStopDate().toDate());
 		
-		String query2 = "SELECT losers.player2 as player, count(losers.player2) as result INTO domainapp.dom.superscore.PlayerScoreResult "
+		String query2 = "SELECT winners.player2 as player, count(winners.player2) as result INTO domainapp.dom.superscore.PlayerScoreResult "
 		        + "FROM domainapp.dom.superscore.Match "
 		        + "WHERE when >= :startDate && when <= :stopDate "
 		        + " && underTable == true "
-		        + "GROUP BY losers.player2 "
-		        + "ORDER BY count(losers.player2) DESC "
+		        + "GROUP BY winners.player2 "
+		        + "ORDER BY count(winners.player2) DESC "
 		        ;
 		
 		@SuppressWarnings("unchecked")
@@ -177,10 +181,9 @@ public class WorstPlayers {
 		
 		Query jdoQuery = pm.newQuery(query);
 		jdoQuery.setCandidates(l);
-		@SuppressWarnings("unchecked")
-		List<PlayerScoreResult> data = (List<PlayerScoreResult>) jdoQuery.execute();
+		Object data = jdoQuery.execute();
 		
-		return data;
+		return (List<PlayerScoreResult>) data;
 	}
 
 	@javax.inject.Inject 

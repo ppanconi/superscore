@@ -16,6 +16,7 @@ import org.apache.isis.applib.annotation.MemberOrder;
 import org.apache.isis.applib.annotation.NatureOfService;
 import org.apache.isis.applib.annotation.ParameterLayout;
 import org.apache.isis.applib.annotation.SemanticsOf;
+import org.apache.isis.applib.query.QueryDefault;
 import org.apache.isis.applib.services.eventbus.ActionDomainEvent;
 import org.apache.isis.applib.services.i18n.TranslatableString;
 import org.apache.isis.applib.util.TitleBuffer;
@@ -44,11 +45,14 @@ public class Matches {
             semantics = SemanticsOf.SAFE
     )
     @ActionLayout(
-            bookmarking = BookmarkPolicy.AS_ROOT
+            bookmarking = BookmarkPolicy.AS_ROOT,
+            named="List latest Matches"
     )
     @MemberOrder(sequence = "1")
-    public List<Match> listAll() {
-        return container.allInstances(Match.class);
+    public List<Match> listLastest() {
+//        List<Match> l = container.allInstances(Match.class);
+    	List<Match> l = container.allMatches(new QueryDefault<Match>(Match.class, "selectLast200"));
+        return l;
     }
     //endregion
 

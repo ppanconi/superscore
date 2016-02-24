@@ -17,17 +17,12 @@ import org.apache.isis.applib.annotation.SemanticsOf;
 import org.apache.isis.applib.query.QueryDefault;
 import org.apache.isis.applib.services.eventbus.ActionDomainEvent;
 import org.apache.isis.applib.services.i18n.TranslatableString;
-import org.apache.isis.applib.util.TitleBuffer;
 import org.isisaddons.module.security.dom.role.ApplicationRole;
 import org.isisaddons.module.security.dom.role.ApplicationRoleRepository;
 import org.isisaddons.module.security.dom.user.ApplicationUser;
 import org.isisaddons.module.security.dom.user.ApplicationUserRepository;
 
 import com.google.common.collect.Lists;
-
-import domainapp.dom.simple.SimpleObject;
-import domainapp.dom.simple.SimpleObjects;
-import domainapp.dom.simple.SimpleObjects.CreateDomainEvent;
 
 @DomainService(
         nature = NatureOfService.VIEW,
@@ -58,8 +53,10 @@ public class Teams {
     //endregion
 
     //region > create (action)
-    public static class CreateDomainEvent extends ActionDomainEvent<Teams> {
-        public CreateDomainEvent(final Teams source, final Identifier identifier, final Object... arguments) {
+    @SuppressWarnings("serial")
+	public static class CreateDomainEvent extends ActionDomainEvent<Teams> {
+        @SuppressWarnings("deprecation")
+		public CreateDomainEvent(final Teams source, final Identifier identifier, final Object... arguments) {
             super(source, identifier, arguments);
         }
     }
