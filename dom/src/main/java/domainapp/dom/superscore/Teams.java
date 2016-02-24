@@ -44,7 +44,8 @@ public class Teams {
             semantics = SemanticsOf.SAFE
     )
     @ActionLayout(
-            bookmarking = BookmarkPolicy.AS_ROOT
+            bookmarking = BookmarkPolicy.AS_ROOT,
+            named="List All Teams"
     )
     @MemberOrder(sequence = "1")
     public List<Team> listAll() {
@@ -120,7 +121,7 @@ public class Teams {
             semantics = SemanticsOf.SAFE
     )
     @MemberOrder(sequence = "2")
-	public List<Team> findByNames(final String search) {
+	public List<Team> findByNames(final  @ParameterLayout(named="Players name") String search) {
 		if (search != null && search.length() > 0) {
 			String[] parts = search.split(" ");
 			if (parts.length > 1) {
