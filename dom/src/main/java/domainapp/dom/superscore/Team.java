@@ -38,8 +38,8 @@ import domainapp.dom.simple.SimpleObject;
         strategy=javax.jdo.annotations.IdGeneratorStrategy.IDENTITY,
          column="id")
 @javax.jdo.annotations.Version(
-//        strategy=VersionStrategy.VERSION_NUMBER,
-        strategy= VersionStrategy.DATE_TIME,
+        strategy=VersionStrategy.VERSION_NUMBER,
+//        strategy= VersionStrategy.DATE_TIME,
         column="version")
 @javax.jdo.annotations.Queries( {
     @javax.jdo.annotations.Query(
