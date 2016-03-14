@@ -81,15 +81,18 @@ public class Teams {
     	} else
     		return team;
     }
-
     //endregion
 
     public List<ApplicationUser> autoComplete0Create(final String search) {
-    	 return getSuperscoreUsers(search);
+    	String _search = "";
+    	if (search != null) _search = search; 
+    	return getSuperscoreUsers(_search);
     }
     
     public List<ApplicationUser> autoComplete1Create(final String search) {
-    	return getSuperscoreUsers(search);
+    	String _search = "";
+    	if (search != null) _search = search; 
+    	return getSuperscoreUsers(_search);
     }
     	
     @Programmatic
@@ -97,14 +100,35 @@ public class Teams {
     	List<ApplicationUser> l = Lists.newArrayList();
     	ApplicationRole supercoreRole = applicationRoleRepository.findByName("superscore-regular-user");
     	
-    	List<ApplicationUser> users = applicationUserRepository.autoComplete(search);
+    	List<ApplicationUser> users = null;
+    	if (search == null) {
+    		users = applicationUserRepository.allUsers();
+    	} else {
+    		users = applicationUserRepository.autoComplete(search);
+    	}
+    	
     	for (ApplicationUser applicationUser : users) {
 			if (applicationUser.getRoles().contains(supercoreRole)) 
 				l.add(applicationUser);
 		}
     	
     	return l;
-    }	
+    }
+    
+    // {{ actionName (action)
+	@MemberOrder(sequence = "5")
+	public List<Team> careateAllTeams() {
+		List<ApplicationUser> allusers = getSuperscoreUsers(null);
+		for (int i = 0; i < allusers.size(); i++) {
+			ApplicationUser user = allusers.get(i);
+			for (int j = i + 1; j < allusers.size(); j++) {
+				create(user, allusers.get(j));
+			}
+		}
+		return listAll();
+	}
+	// }}
+
     
     public String validateCreate(
             final @ParameterLayout(named="Player 1") ApplicationUser player1,

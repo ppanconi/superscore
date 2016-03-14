@@ -100,7 +100,7 @@ public class Team implements Comparable<Team>{
 
 	public String title() {
 		final TitleBuffer buf = new TitleBuffer();
-		buf.append(getPlayer1().getUsername() + "," + getPlayer2().getUsername());
+		buf.append(getPlayer1().title() + "," + getPlayer2().title());
 		return buf.toString();
 	}
 	
